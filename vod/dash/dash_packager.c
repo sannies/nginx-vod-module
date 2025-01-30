@@ -111,7 +111,11 @@
 	"          codecs=\"%V\"\n"													\
 	"          audioSamplingRate=\"%uD\"\n"										\
 	"          startWithSAP=\"1\"\n"											\
-	"          bandwidth=\"%uD\">\n"
+	"          bandwidth=\"%uD\">\n"											\
+ 	"          <AudioChannelConfiguration\n"									\
+	"              schemeIdUri=\"urn:mpeg:dash:23003:3:"						\
+					    			"audio_channel_configuration:2011\"\n"		\
+	"              value=\"%uD\"/>\n"
 
 #define VOD_DASH_MANIFEST_ADAPTATION_HEADER_SUBTITLE_SMPTE_TT					\
 	"    <AdaptationSet\n"														\
@@ -885,8 +889,9 @@ dash_packager_write_mpd_period(
 			}
 			else
 			{
-				p = vod_copy(p, VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG,
-					sizeof(VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG) - 1);
+			//	p = vod_copy(p, VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG,
+			//		sizeof(VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG) - 1);
+            // We'll go for a per Representation Approach
 			}
 			break;
 
@@ -1038,7 +1043,10 @@ dash_packager_write_mpd_period(
 					&dash_codecs[cur_track->media_info.codec_id].mime_type,
 					&cur_track->media_info.codec_name,
 					cur_track->media_info.u.audio.sample_rate,
-					cur_track->media_info.bitrate);
+					cur_track->media_info.bitrate,
+                    cur_track->media_info.u.audio.channels
+                                          );
+
 				break;
 
 			case MEDIA_TYPE_SUBTITLE:
