@@ -60,21 +60,23 @@
 	"    <AdaptationSet\n"														\
 	"        id=\"%uD\"\n"														\
 	"        mimeType=\"%V\"\n"													\
+	"        subsegmentAlignment=\"true\"\n"									\
+	"        subsegmentStartsWithSAP=\"1\"\n"									\
+	"        mimeType=\"%V\"\n"													\
 	"        segmentAlignment=\"true\"\n"										\
 	"        maxWidth=\"%uD\"\n"												\
 	"        maxHeight=\"%uD\"\n"												\
-	"        maxFrameRate=\"%V\">\n"
+ 	"        startWithSAP=\"1\">\n"												\
 
 #define VOD_DASH_MANIFEST_REPRESENTATION_HEADER_VIDEO							\
 	"      <Representation\n"													\
 	"          id=\"%V\"\n"														\
-	"          mimeType=\"%V\"\n"												\
 	"          codecs=\"%V\"\n"													\
 	"          width=\"%uD\"\n"													\
 	"          height=\"%uD\"\n"												\
 	"          frameRate=\"%V\"\n"												\
+	"          scanType="progressive"\n"										\
 	"          sar=\"1:1\"\n"													\
-	"          startWithSAP=\"1\"\n"											\
 	"          bandwidth=\"%uD\">\n"
 
 #define VOD_DASH_MANIFEST_ADAPTATION_HEADER_AUDIO								\
@@ -1020,7 +1022,6 @@ dash_packager_write_mpd_period(
 				p = vod_sprintf(p,
 					VOD_DASH_MANIFEST_REPRESENTATION_HEADER_VIDEO,
 					&representation_id,
-					&dash_codecs[cur_track->media_info.codec_id].mime_type,
 					&cur_track->media_info.codec_name,
 					(uint32_t)cur_track->media_info.u.video.width,
 					(uint32_t)cur_track->media_info.u.video.height,
