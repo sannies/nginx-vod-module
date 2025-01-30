@@ -59,6 +59,7 @@
 #define VOD_DASH_MANIFEST_ADAPTATION_HEADER_VIDEO								\
 	"    <AdaptationSet\n"														\
 	"        id=\"%uD\"\n"														\
+	"        mimeType=\"%V\"\n"													\
 	"        segmentAlignment=\"true\"\n"										\
 	"        maxWidth=\"%uD\"\n"												\
 	"        maxHeight=\"%uD\"\n"												\
@@ -84,6 +85,7 @@
 #define VOD_DASH_MANIFEST_ADAPTATION_HEADER_AUDIO_LANG							\
 	"    <AdaptationSet\n"														\
 	"        id=\"%uD\"\n"														\
+	"        mimeType=\"%V\"\n"													\
 	"        lang=\"%V\"\n"														\
 	"        label=\"%V\"\n"													\
 	"        segmentAlignment=\"true\">\n"
@@ -851,6 +853,7 @@ dash_packager_write_mpd_period(
 			p = vod_sprintf(p,
 				VOD_DASH_MANIFEST_ADAPTATION_HEADER_VIDEO,
 				adapt_id++,
+				&dash_codecs[reference_track->media_info.codec_id].mime_type,
 				max_width,
 				max_height,
 				&frame_rate);
@@ -860,8 +863,9 @@ dash_packager_write_mpd_period(
 			reference_track = (*adaptation_set->first) + filtered_clip_offset;
 			if (reference_track->media_info.tags.lang_str.len > 0 || reference_track->media_info.tags.label.len > 0)
 			{
-				p = vod_sprintf(p, VOD_DASH_MANIFEST_ADAPTATION_HEADER_AUDIO_LANG, 
-					adapt_id++, 
+				p = vod_sprintf(p, VOD_DASH_MANIFEST_ADAPTATION_HEADER_AUDIO_LANG,
+					adapt_id++,
+                    &dash_codecs[reference_track->media_info.codec_id].mime_type,
 					&reference_track->media_info.tags.lang_str,
 					&reference_track->media_info.tags.label);
 			}
