@@ -62,7 +62,6 @@
 	"        mimeType=\"%V\"\n"													\
 	"        subsegmentAlignment=\"true\"\n"									\
 	"        subsegmentStartsWithSAP=\"1\"\n"									\
-	"        mimeType=\"%V\"\n"													\
 	"        segmentAlignment=\"true\"\n"										\
 	"        maxWidth=\"%uD\"\n"												\
 	"        maxHeight=\"%uD\"\n"												\
@@ -75,7 +74,7 @@
 	"          width=\"%uD\"\n"													\
 	"          height=\"%uD\"\n"												\
 	"          frameRate=\"%V\"\n"												\
-	"          scanType="progressive"\n"										\
+	"          scanType=\"progressive\"\n"										\
 	"          sar=\"1:1\"\n"													\
 	"          bandwidth=\"%uD\">\n"
 
@@ -674,6 +673,8 @@ dash_packager_write_frame_rate(
 		result->len = vod_sprintf(p, "%uD/%uD", timescale, duration) - p;
 	}
 }
+
+
 
 static uint32_t
 dash_packager_get_eac3_channel_config(media_info_t* media_info)
