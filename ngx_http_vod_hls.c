@@ -386,6 +386,7 @@ ngx_http_vod_hls_handle_master_playlist(
 	}
 
 #if (NGX_HAVE_OPENSSL_EVP)
+    vod_uint_t container_format;
     container_format = ngx_http_vod_hls_get_container_format(
             &conf->hls,
             &submodule_context->media_set);
