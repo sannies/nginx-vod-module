@@ -374,13 +374,16 @@ ngx_http_vod_hls_handle_master_playlist(
 	ngx_str_t* content_type)
 {
 	ngx_http_vod_loc_conf_t* conf = submodule_context->conf;
+    hls_mpegts_muxer_conf_t muxer_conf;
 	ngx_str_t base_url = ngx_null_string;
     hls_encryption_params_t encryption_params;
     vod_status_t rc;
 
-    ngx_uint_t container_format;
-
-
+	rc = ngx_http_vod_hls_init_muxer_conf(submodule_context, &muxer_conf);
+	if (rc != NGX_OK)
+	{
+		return rc;
+	}
 
 #if (NGX_HAVE_OPENSSL_EVP)
     container_format = ngx_http_vod_hls_get_container_format(
@@ -430,7 +433,7 @@ ngx_http_vod_hls_handle_master_playlist(
 		conf->hls.encryption_method,
 		&base_url,
 		&submodule_context->media_set,
-        &conf->hls.mpegts_muxer_config,
+        &muxer_conf,
         &encryption_params,
 		response);
 	if (rc != VOD_OK)
