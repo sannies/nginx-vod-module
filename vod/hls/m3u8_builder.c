@@ -1108,6 +1108,7 @@ m3u8_builder_write_variants(
         uint32_t avg_bandwidth;
 
 
+
         // get the audio / video tracks
 		if (muxed_tracks == MEDIA_TYPE_COUNT)
 		{
@@ -1120,10 +1121,15 @@ m3u8_builder_write_variants(
 			tracks[adaptation_set->type] = cur_track_ptr[0];
 		}
 
-
-        media_set->filtered_tracks = cur_track_ptr[0];
-        media_set->filtered_tracks_end = cur_track_ptr[0];
-        media_set->total_track_count = 1;
+		if ((tracks[MEDIA_TYPE_VIDEO] != NULL) != (tracks[MEDIA_TYPE_AUDIO] != NULL)) {
+        	media_set->filtered_tracks = cur_track_ptr[0];
+        	media_set->filtered_tracks_end = cur_track_ptr[0];
+        	media_set->total_track_count = 1;
+        } else {
+            media_set->filtered_tracks = cur_track_ptr[0];
+        	media_set->filtered_tracks_end = cur_track_ptr[1];
+        	media_set->total_track_count = 2;
+		}
         hls_muxer_simulate_get_segment_sizes(request_context, segment_durations, muxer_conf, encryption_params, media_set,  &bandwidth, &avg_bandwidth);
         vod_log_error(VOD_LOG_ERR, request_context->log, 0,
                       "m3u8_builder_write_variants (bandwidth avg_bandwidth): %L %L", bandwidth, avg_bandwidth);

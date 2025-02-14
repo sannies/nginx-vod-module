@@ -1329,7 +1329,7 @@ hls_muxer_simulate_get_segment_sizes(
             if (repeat_count <= 0)
             {
                 cur_item++;
-                vod_log_error(VOD_LOG_ERR, state.request_context->log, 0,
+                vod_log_debug0(VOD_LOG_DEBUG_LEVEL, state.request_context->log, 0,
                               "hls_muxer_simulate_get_segment_sizes: next segment duration");
 
                 if (cur_item >= last_item)
