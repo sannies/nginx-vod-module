@@ -77,6 +77,7 @@ typedef struct {
 	atom_info_t elst;
 	atom_info_t tkhd;
 	atom_info_t udta_name;
+    atom_info_t udta_kind;
 } trak_atom_infos_t;
 
 typedef struct {
@@ -194,6 +195,7 @@ static const relevant_atom_t relevant_atoms_edts[] = {
 
 static const relevant_atom_t relevant_atoms_udta[] = {
 	{ ATOM_NAME_NAME, offsetof(trak_atom_infos_t, udta_name), NULL },
+	{ ATOM_NAME_NAME, offsetof(trak_atom_infos_t, udta_kind), NULL },
 	{ ATOM_NAME_NULL, 0, NULL }
 };
 
@@ -544,6 +546,39 @@ mp4_parser_parse_mdhd_atom(atom_info_t* atom_info, metadata_parse_context_t* con
 
 static vod_status_t
 mp4_parser_parse_udta_name_atom(atom_info_t* atom_info, metadata_parse_context_t* context)
+{
+	media_tags_t* tags;
+	vod_str_t name;
+
+	name.data = (u_char*)atom_info->ptr;
+	name.len = atom_info->size;
+
+	// atom empty/non-existent or name already set
+	tags = &context->media_info.tags;
+	if (name.len == 0 || tags->label.data != NULL)
+	{
+		return VOD_OK;
+	}
+
+	tags->label.data = vod_alloc(
+		context->request_context->pool,
+		name.len + 1);
+	if (tags->label.data == NULL)
+	{
+		vod_log_debug0(VOD_LOG_DEBUG_LEVEL, context->request_context->log, 0,
+			"mp4_parser_parse_udta_name_atom: vod_alloc failed");
+		return VOD_ALLOC_FAILED;
+	}
+
+	vod_memcpy(tags->label.data, name.data, name.len);
+	tags->label.data[name.len] = '\0';
+	tags->label.len = name.len;
+
+	return VOD_OK;
+}
+
+static vod_status_t
+mp4_parser_parse_udta_kind_atom(atom_info_t* atom_info, metadata_parse_context_t* context)
 {
 	media_tags_t* tags;
 	vod_str_t name;

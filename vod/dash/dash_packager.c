@@ -93,13 +93,13 @@
 
 // TODO: value should be the number of channels ?
 #define VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG									\
-	"      <AudioChannelConfiguration\n"										\
+	"      <AAAAAAAAudioChannelConfiguration\n"										\
 	"          schemeIdUri=\"urn:mpeg:dash:23003:3:"							\
 								"audio_channel_configuration:2011\"\n"			\
 	"          value=\"1\"/>\n"
 
 #define VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG_EAC3								\
-	"      <AudioChannelConfiguration\n"										\
+	"      <AAAAAAAAudioChannelConfiguration\n"										\
 	"          schemeIdUri=\"tag:dolby.com,2014:dash:"							\
 								"audio_channel_configuration:2011\"\n"			\
 	"          value=\"%uxD\"/>\n"
@@ -112,7 +112,7 @@
 	"          audioSamplingRate=\"%uD\"\n"										\
 	"          startWithSAP=\"1\"\n"											\
 	"          bandwidth=\"%uD\">\n"											\
- 	"          <AudioChannelConfiguration\n"									\
+ 	"          <AAAAAAAAudioChannelConfiguration\n"									\
 	"              schemeIdUri=\"urn:mpeg:dash:23003:3:"						\
 					    			"audio_channel_configuration:2011\"\n"		\
 	"              value=\"%uD\"/>\n"
