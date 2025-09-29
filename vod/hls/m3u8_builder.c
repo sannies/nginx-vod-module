@@ -42,9 +42,9 @@
 // constants
 static const u_char m3u8_header[] = "#EXTM3U\n";
 static const u_char m3u8_footer[] = "#EXT-X-ENDLIST\n";
-static const char m3u8_stream_inf_video[] = "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%uD,RESOLUTION=%uDx%uD,FRAME-RATE=%uD.%03uD,CODECS=\"%V";
+static const char m3u8_stream_inf_video[] = "#EXT-X-STREAM-INF:PROGRAM-ID=1,RESOLUTION=%uDx%uD,FRAME-RATE=%uD.%03uD,CODECS=\"%V";
 static const char m3u8_stream_inf_audio[] = "#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%uD,CODECS=\"%V";
-static const char m3u8_average_bandwidth[] = ",AVERAGE-BANDWIDTH=%uD";
+static const char m3u8_video_bandwidth[] = ",BANDWIDTH=%uD,AVERAGE-BANDWIDTH=%uD";
 static const char m3u8_iframe_stream_inf[] = "#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=%uD,RESOLUTION=%uDx%uD,CODECS=\"%V\",URI=\"";
 static const u_char m3u8_discontinuity[] = "#EXT-X-DISCONTINUITY\n";
 static const char byte_range_tag_format[] = "#EXT-X-BYTERANGE:%uD@%uD\n";
@@ -1097,18 +1097,14 @@ m3u8_builder_write_variants(
 	media_info_t* video = NULL;
 	media_info_t* audio = NULL;
 	uint32_t muxed_tracks = adaptation_set->type == ADAPTATION_TYPE_MUXED ? MEDIA_TYPE_COUNT : 1;
-
+	uint32_t bandwidth;
+	uint32_t avg_bandwidth;
 	vod_memzero(tracks, sizeof(tracks));
 
 	for (cur_track_ptr = adaptation_set->first;
 		cur_track_ptr < adaptation_set->last;
 		cur_track_ptr += muxed_tracks)
 	{
-        uint32_t bandwidth;
-        uint32_t avg_bandwidth;
-
-
-
         // get the audio / video tracks
 		if (muxed_tracks == MEDIA_TYPE_COUNT)
 		{
@@ -1120,20 +1116,6 @@ m3u8_builder_write_variants(
 			// Note: this is ok because the adaptation types enum is aligned with media types
 			tracks[adaptation_set->type] = cur_track_ptr[0];
 		}
-
-		if ((tracks[MEDIA_TYPE_VIDEO] != NULL) != (tracks[MEDIA_TYPE_AUDIO] != NULL)) {
-        	media_set->filtered_tracks = cur_track_ptr[0];
-        	media_set->filtered_tracks_end = cur_track_ptr[0];
-        	media_set->total_track_count = 1;
-        } else {
-            media_set->filtered_tracks = cur_track_ptr[0];
-        	media_set->filtered_tracks_end = cur_track_ptr[1];
-        	media_set->total_track_count = 2;
-		}
-        hls_muxer_simulate_get_segment_sizes(request_context, segment_durations, muxer_conf, encryption_params, media_set,  &bandwidth, &avg_bandwidth);
-        vod_log_error(VOD_LOG_ERR, request_context->log, 0,
-                      "m3u8_builder_write_variants (bandwidth avg_bandwidth): %L %L", bandwidth, avg_bandwidth);
-
 
         // output EXT-X-STREAM-INF
 		if (tracks[MEDIA_TYPE_VIDEO] != NULL)
@@ -1152,14 +1134,13 @@ m3u8_builder_write_variants(
 				audio = NULL;
 			}
 
-
 			p = vod_sprintf(p, m3u8_stream_inf_video,
-                bandwidth,
 				(uint32_t)video->u.video.width,
 				(uint32_t)video->u.video.height,
 				(uint32_t)(video->timescale / video->min_frame_duration),
 				(uint32_t)((((uint64_t)video->timescale * 1000) / video->min_frame_duration) % 1000),
 				&video->codec_name);
+
 			if (audio != NULL)
 			{
 				*p++ = ',';
@@ -1178,13 +1159,21 @@ m3u8_builder_write_variants(
 			}
 
 
-			p = vod_sprintf(p, m3u8_stream_inf_audio, bandwidth, &audio->codec_name);
+			p = vod_sprintf(p, m3u8_stream_inf_audio, audio->bitrate, &audio->codec_name);
 		}
 
 		*p++ = '\"';
 
-    	p = vod_sprintf(p, m3u8_average_bandwidth, avg_bandwidth);
-
+		if ((tracks[MEDIA_TYPE_VIDEO] != NULL) && (tracks[MEDIA_TYPE_AUDIO] != NULL)) {
+   	        media_set->filtered_tracks = cur_track_ptr[0];
+       		media_set->filtered_tracks_end = cur_track_ptr[1];
+       		media_set->total_track_count = 2;
+	        avg_bandwidth = 0;
+	        hls_muxer_simulate_get_segment_sizes(request_context, segment_durations, muxer_conf, encryption_params, media_set,  &bandwidth, &avg_bandwidth);
+    	    vod_log_error(VOD_LOG_ERR, request_context->log, 0,
+                      "m3u8_builder_write_variants (bandwidth avg_bandwidth): %L %L", bandwidth, avg_bandwidth);
+			p = vod_sprintf(p, m3u8_video_bandwidth, bandwidth, avg_bandwidth);
+		}
 
 		if (tracks[MEDIA_TYPE_VIDEO] != NULL)
 		{
@@ -1363,7 +1352,7 @@ m3u8_builder_build_master_playlist(
 	max_video_stream_inf =
 		sizeof(m3u8_stream_inf_video) - 1 + 5 * VOD_INT32_LEN + MAX_CODEC_NAME_SIZE +
 		MAX_CODEC_NAME_SIZE + 1 +		// 1 = ,
-		sizeof(m3u8_average_bandwidth) - 1 + VOD_INT32_LEN +
+		sizeof(m3u8_video_bandwidth) - 1 + VOD_INT32_LEN +
 		sizeof(M3U8_VIDEO_RANGE_SDR) - 1 +
 		sizeof("\"\n\n") - 1;
 
