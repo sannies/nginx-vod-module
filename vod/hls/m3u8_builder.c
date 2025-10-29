@@ -1170,8 +1170,8 @@ m3u8_builder_write_variants(
        		media_set->total_track_count = 2;
 	        avg_bandwidth = 0;
 	        hls_muxer_simulate_get_segment_sizes(request_context, segment_durations, muxer_conf, encryption_params, media_set,  &bandwidth, &avg_bandwidth);
-    	    vod_log_error(VOD_LOG_ERR, request_context->log, 0,
-                      "m3u8_builder_write_variants (bandwidth avg_bandwidth): %L %L", bandwidth, avg_bandwidth);
+    	    //vod_log_error(VOD_LOG_ERR, request_context->log, 0,
+            //          "m3u8_builder_write_variants (bandwidth avg_bandwidth): %L %L", bandwidth, avg_bandwidth);
 			p = vod_sprintf(p, m3u8_video_bandwidth, bandwidth, avg_bandwidth);
 		}
 
